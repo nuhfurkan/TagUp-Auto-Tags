@@ -62,6 +62,9 @@ function together_ajax_generate_tags() {
     $language = get_option('together_language', 'en');
     $country = get_option('together_country', 'US');
 
+    // Replace links in the content
+    $content = preg_replace('#https?://[^\s]+#', '', $content);
+
     $ai_tags = together_call_api_for_tags($title, $content, $api_key, $language, $country);
 
     if (!is_array($ai_tags)) $ai_tags = [];
