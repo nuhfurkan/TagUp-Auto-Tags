@@ -5,7 +5,9 @@ Description: Generate and choose tags for your post using together AI and Google
 Version: 0.1
 Author: Nuh Furkan Erturk
 */
-
+define('WP_DEBUG', true);
+define('WP_DEBUG_LOG', true);
+define('WP_DEBUG_DISPLAY', false);
 
 add_action('add_meta_boxes', 'together_add_tag_meta_box');
 add_action('admin_enqueue_scripts', 'together_enqueue_scripts');
@@ -61,9 +63,12 @@ function together_ajax_generate_tags() {
     $api_key = get_option('together_api_key');
     $language = get_option('together_language', 'en');
     $country = get_option('together_country', 'US');
-
-    // Replace links in the content
+	
     $content = preg_replace('#https?://[^\s]+#', '', $content);
+	
+	error_log($content);
+	
+	$content = preg_replace('#https?://[^\s]+#', '', $content);
 
     $ai_tags = together_call_api_for_tags($title, $content, $api_key, $language, $country);
 
@@ -72,15 +77,17 @@ function together_ajax_generate_tags() {
     // ✅ Fetch existing tag names properly
     $current_tags = wp_get_post_terms($post_id, 'post_tag', ['fields' => 'names']);
 
+	error_log($current_tags);
+	
     // ✅ Merge and deduplicate
     $merged_tags = array_unique(array_merge($current_tags, $ai_tags));
 
+	error_log($merged_tags);
+	
     // ✅ Set all tags (append mode)
     wp_set_post_tags($post_id, $merged_tags, false);
 
-    wp_send_json_success($merged_tags);
-
-	error_log(json_encode($merged_tags));
+    wp_send_json_success($ai_tags);
 }
 
 
